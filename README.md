@@ -1,14 +1,67 @@
-# Agility CMS & Next.js Starter
+# Agility CMS & Next.js Starter with Authenticated Routes using Auth0 and RBAC
 
 This is sample Next.js starter site that uses Agility CMS and aims to be a foundation for building sites using Next.js and Agility CMS.
 
-[Live Website Demo](https://agilitycms-nextjs-starter-blog.vercel.app/)
-
 [New to Agility CMS? Sign up for a FREE account](https://agilitycms.com/free)
 
-## 📢 UPDATED FOR NEXT.JS 15 📢
+### Configuring Auth0
 
-- We have updated this starter for Next.js 15.0.3. It is built on top of the [@agility/nextjs](https://www.npmjs.com/package/@agility/nextjs) npm package specialized for app router.
+[New to Auth0? Sign up for FREE account](https://auth0.com/signup)
+
+
+### Configure your API
+
+You will need to add a Custom API with RBAC enabled
+
+<img width="1511" alt="Screenshot 2025-03-11 at 6 06 44 PM" src="https://github.com/user-attachments/assets/a5ef7690-206e-4829-9405-6aeb8f024896" />
+
+<img width="1002" alt="Screenshot 2025-03-11 at 6 06 54 PM" src="https://github.com/user-attachments/assets/6e5506ea-a944-4571-9141-112c11d535b7" />
+
+This gets configured in `/lib/auth0/auth0.ts`
+
+The audience is the identifier used when creating the Custom API
+
+```
+export const auth0 = new Auth0Client({
+  authorizationParameters: {
+    scope: "openid profile email offline_access",
+    audience: "http://localhost:3000",
+  },
+});
+```
+
+
+#### Setup your user Roles
+<img width="1425" alt="Screenshot 2025-03-11 at 6 06 11 PM" src="https://github.com/user-attachments/assets/5dad16d1-104d-464c-86e1-82682f0746cb" />
+
+Don't forget to assign the Roles to your users. 
+
+#### Attaching the Roles to your Token
+You need to setup a Post-Login action
+<img width="1509" alt="Screenshot 2025-03-11 at 6 07 16 PM" src="https://github.com/user-attachments/assets/4d8dc25e-a25f-4097-9817-5cca635ca042" />
+
+```
+/**
+ * @param {Event} event - Details about the user and the context in which they are logging in.
+ * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.
+ */
+exports.onExecutePostLogin = async (event, api) => {
+  const namespace = 'http://localhost:3000';
+  if (event.authorization) {
+    api.idToken.setCustomClaim(`${namespace}/roles`, event.authorization.roles);
+    api.accessToken.setCustomClaim(`${namespace}/roles`, event.authorization.roles);
+  }
+} 
+```
+
+### Configuring your Agility Instance
+
+This requires some parity with your user Roles. When creating a list of secure pages for a specific group, the content list should be prefixed with the Group. 
+
+
+
+
+
 
 ### Caching
 
