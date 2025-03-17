@@ -1,10 +1,7 @@
-import { ImageField, ContentItem } from "@agility/nextjs"
-import { IAuthor } from "./IAuthor"
-import { ICategory } from "./ICategory"
-import { ITag } from "./ITag"
+import { ContentItem } from "@agility/nextjs"
 
 export interface IPermission {
-	name: string
+	group: string
 }
 
 export interface ISecureComponent {

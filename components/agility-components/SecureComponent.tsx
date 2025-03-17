@@ -41,15 +41,18 @@ export default async function SecureComponent({
     languageCode,
   });
 
-  const permissionStrings = permissions.map(p => p.fields.name);
+  const permissionStrings = permissions.map(p => p.fields.group);
 
+  console.log("my permissions", userPermissions)
   console.log("secure component permissions", permissionStrings);
 
   const hasPermission = permissionStrings.every((routePermission) => {
     return userPermissions.includes(routePermission);
   });
 
-  if (hasPermission) {
+  console.log("hasPermission", hasPermission);
+
+  if (!hasPermission) {
     return (
       <section id={`${contentID}`} className="relative px-8" data-agility-component={contentID}>
         <div className="max-w-2xl mx-auto my-12 md:mt-18 lg:mt-20">
