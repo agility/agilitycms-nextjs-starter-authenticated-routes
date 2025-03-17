@@ -12,7 +12,6 @@ interface Props {
 }
 
 const SiteHeader = ({ header }: Props) => {
- 
   const [open, setOpen] = useState(false);
   const [secureMenus, setSecureMenus] = useState<any>([]);
 
@@ -28,8 +27,6 @@ const SiteHeader = ({ header }: Props) => {
           },
         });
         const data = await response.json();
-
-		console.log('secure menus data ->:', data)
         setSecureMenus(data);
       } catch (error) {
         console.error("Error fetching secure content:", error);
@@ -105,25 +102,35 @@ const SiteHeader = ({ header }: Props) => {
               );
             })}
 
-			{secureMenus && secureMenus?.map((navitem: any, index: number) => {
-				return (
-					<Link
-						href={navitem.url}
-						key={`secure_page-${index}`}
-						className="text-base leading-6 font-medium text-secondary-500 hover:text-primary-500 border-transparent border-b-2 hover:border-primary-500 hover:border-b-primary hover:border-b-2 focus:outline-none focus:text-primary-500 transition duration-300"
-					>
-						{navitem.menuText}
-					</Link>
-				);
-			})}
+            {secureMenus &&
+              secureMenus?.map((navitem: any, index: number) => {
+                return (
+                  <Link
+                    href={navitem.url}
+                    key={`secure_page-${index}`}
+                    className="text-base leading-6 font-medium text-secondary-500 hover:text-primary-500 border-transparent border-b-2 hover:border-primary-500 hover:border-b-primary hover:border-b-2 focus:outline-none focus:text-primary-500 transition duration-300"
+                  >
+                    {navitem.menuText}
+                  </Link>
+                );
+              })}
 
             {!user && (
-              <a
-                className="bg-red-500 text-white py-2 px-4 rounded-md"
-                href={"/auth/login"}
-              >
-                Log in
-              </a>
+              <>
+                {" "}
+                <a
+                  className="bg-red-500 text-white py-2 px-4 rounded-md"
+                  href={"/auth/login"}
+                >
+                  Log in
+                </a>
+                <a
+                  className="bg-red-500 text-white py-2 px-4 rounded-md"
+                  href={"/auth/login?screen_hint=signup"}
+                >
+                  Sign up
+                </a>
+              </>
             )}
             {user && (
               <a
