@@ -7,6 +7,8 @@ const jwt = require("jsonwebtoken");
 
 // This function can be marked `async` if using `await` inside
 export async function middleware(request: NextRequest) {
+
+
   // Run Auth0 middleware first
   const authRes = await auth0.middleware(request);
 
@@ -18,6 +20,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+
+
+
+  //get the list of authorized routes in Agility
   const routes = await getContentList({
     referenceName: "AuthedRoutes",
     languageCode: "en-us",
@@ -30,32 +36,32 @@ export async function middleware(request: NextRequest) {
 
   const session = await auth0.getSession(request);
 
-if (session) {
-	const decoded = jwt.decode(session.tokenSet.accessToken, {
-		complete: true,
-	});
-	const userPermissions = decoded.payload.permissions;
+  if (session) {
+    const decoded = jwt.decode(session.tokenSet.accessToken, {
+      complete: true,
+    });
+    const userPermissions = decoded.payload.permissions;
 
-	const route = routePermissions.find(
-		(route: any) => route.url === request.nextUrl.pathname
-	);
+    const route = routePermissions.find(
+      (route: any) => route.url === request.nextUrl.pathname
+    );
 
-	if (
-		route &&
-		route.permissions?.some((permission: string) =>
-			userPermissions.includes(permission)
-		)
-	) {
-		return NextResponse.next();
-	} else if (
-		route &&
-		!route.permissions.some((permission: string) =>
-			userPermissions.includes(permission)
-		)
-	) {
-		return NextResponse.redirect(new URL("/", request.nextUrl.origin));
-	}
-}
+    if (
+      route &&
+      route.permissions?.some((permission: string) =>
+        userPermissions.includes(permission)
+      )
+    ) {
+      return NextResponse.next();
+    } else if (
+      route &&
+      !route.permissions.some((permission: string) =>
+        userPermissions.includes(permission)
+      )
+    ) {
+      return NextResponse.redirect(new URL("/", request.nextUrl.origin));
+    }
+  }
 
 
   /*****************************
@@ -78,11 +84,10 @@ if (session) {
     const locale = request.nextUrl.searchParams.get("lang");
     const slug = request.nextUrl.pathname;
     //valid preview key: we need to redirect to the correct url for preview
-    let redirectUrl = `${request.nextUrl.protocol}//${
-      request.nextUrl.host
-    }/api/preview?locale=${locale}&ContentID=${contentIDStr}&slug=${encodeURIComponent(
-      slug
-    )}&agilitypreviewkey=${encodeURIComponent(agilityPreviewKey)}`;
+    let redirectUrl = `${request.nextUrl.protocol}//${request.nextUrl.host
+      }/api/preview?locale=${locale}&ContentID=${contentIDStr}&slug=${encodeURIComponent(
+        slug
+      )}&agilitypreviewkey=${encodeURIComponent(agilityPreviewKey)}`;
     return NextResponse.rewrite(redirectUrl);
   } else if (previewQ === "0") {
     //*** exit preview
@@ -90,11 +95,10 @@ if (session) {
 
     //we need to redirect to the correct url for preview
     const slug = request.nextUrl.pathname;
-    let redirectUrl = `${request.nextUrl.protocol}//${
-      request.nextUrl.host
-    }/api/preview/exit?locale=${locale}&ContentID=${contentIDStr}&slug=${encodeURIComponent(
-      slug
-    )}`;
+    let redirectUrl = `${request.nextUrl.protocol}//${request.nextUrl.host
+      }/api/preview/exit?locale=${locale}&ContentID=${contentIDStr}&slug=${encodeURIComponent(
+        slug
+      )}`;
 
     return NextResponse.redirect(redirectUrl);
   } else if (contentIDStr) {

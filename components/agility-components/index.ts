@@ -5,6 +5,7 @@ import PostDetails from "./PostDetails";
 import Heading from "./Heading";
 import TextBlockWithImage from "./TextBlockWithImage";
 import NoComponentFound from "./NoComponentFound";
+import SecureFile from "./SecureFile";
 import SecureComponent from "./SecureComponent";
 
 
@@ -18,7 +19,8 @@ const allModules = [
 	{ name: "PostsListing", module: PostsListing },
 	{ name: "PostDetails", module: PostDetails },
 	{ name: "RichTextArea", module: RichTextArea },
-	{ name: "SecureComponent", module: SecureComponent}
+	{ name: "SecureFile", module: SecureFile },
+	{ name: "SecureComponent", module: SecureComponent }
 ];
 
 /**
