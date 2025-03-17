@@ -1,7 +1,5 @@
 # Agility CMS & Next.js Starter with Authenticated Routes, Authenticated Components & Authenticated Files
 
-This build is a little bit different than the main repo. It uses user permissions instead of token roles. 
-
 This is sample Next.js starter site that uses Agility CMS and aims to be a foundation for building sites using Next.js and Agility CMS.
 
 [New to Agility CMS? Sign up for a FREE account](https://agilitycms.com/free)
