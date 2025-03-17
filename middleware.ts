@@ -40,20 +40,12 @@ if (session) {
 		(route: any) => route.url === request.nextUrl.pathname
 	);
 
-	console.log('Route', route)
-	console.log('This Route', request.nextUrl.pathname);
-
-	console.log('Route Permissions', route?.permissions);
-	console.log('User Permissions', userPermissions);
-
 	if (
 		route &&
 		route.permissions?.some((permission: string) =>
 			userPermissions.includes(permission)
 		)
 	) {
-
-		console.log("Authorized");
 		return NextResponse.next();
 	} else if (
 		route &&
@@ -61,7 +53,6 @@ if (session) {
 			userPermissions.includes(permission)
 		)
 	) {
-		console.log("Unauthorized");
 		return NextResponse.redirect(new URL("/", request.nextUrl.origin));
 	}
 }
