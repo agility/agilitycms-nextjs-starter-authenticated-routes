@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { auth0 } from "./lib/auth0/auth0";
 import { getAgilityPage } from "lib/cms/getAgilityPage";
-const jwt = require('jsonwebtoken');
+import { getContentList } from "lib/cms/getContentList";
+const jwt = require("jsonwebtoken");
 
 // This function can be marked `async` if using `await` inside
 export async function middleware(request: NextRequest) {
@@ -13,59 +14,58 @@ export async function middleware(request: NextRequest) {
     return authRes;
   }
 
-  if(request.nextUrl.pathname.startsWith("/assets")) {
-	return NextResponse.next();	
+  if (request.nextUrl.pathname.startsWith("/assets")) {
+    return NextResponse.next();
   }
 
-  const page:any = await getAgilityPage({params: {
-	slug: request.nextUrl.pathname.split("/").filter(Boolean),
-  }} as any);
+  const routes = await getContentList({
+    referenceName: "AuthedRoutes",
+    languageCode: "en-us",
+  });
 
+  const routePermissions = routes.items.map((item: any) => ({
+    url: item.fields.url,
+    permissions: item.fields.permissionText?.split(","),
+  }));
 
-if(page){
-const isAuthenticatedRoute = page?.page?.securePage;
-
-if(isAuthenticatedRoute) {
-const pageSecurityGroup = page.dynamicPageItem?.fields?.securityGroup?.fields?.group?.toLowerCase();
-
-const session = await auth0.getSession(request);
+  const session = await auth0.getSession(request);
 
 if (session) {
-	const decoded = jwt.decode(session.tokenSet.accessToken, { complete: true });
-	const authorizedRoles = decoded.payload['http://localhost:3000/roles'];
-	const lowerCaseAuthorizedRoles = authorizedRoles.map((role: string) => role.toLowerCase());
+	const decoded = jwt.decode(session.tokenSet.accessToken, {
+		complete: true,
+	});
+	const userPermissions = decoded.payload.permissions;
 
-	const response = NextResponse.next();
+	const route = routePermissions.find(
+		(route: any) => route.url === request.nextUrl.pathname
+	);
 
-	// Protect routes based on page security group
-	if (isAuthenticatedRoute && pageSecurityGroup && !lowerCaseAuthorizedRoles.includes(pageSecurityGroup)) {
+	console.log('Route', route)
+	console.log('This Route', request.nextUrl.pathname);
+
+	console.log('Route Permissions', route?.permissions);
+	console.log('User Permissions', userPermissions);
+
+	if (
+		route &&
+		route.permissions?.some((permission: string) =>
+			userPermissions.includes(permission)
+		)
+	) {
+
+		console.log("Authorized");
+		return NextResponse.next();
+	} else if (
+		route &&
+		!route.permissions.some((permission: string) =>
+			userPermissions.includes(permission)
+		)
+	) {
+		console.log("Unauthorized");
 		return NextResponse.redirect(new URL("/", request.nextUrl.origin));
 	}
-	
-
-    return response;
-  }
-
 }
 
-}
-
-  // we can check the route against the the authorizedRole
-
-
-  // if you wanted you could secure the route in the middleware
-  // the following with auth every single route
-  // you could conditionally trigger this with something like
-  // request.nextUrl.pathname.startsWith("/security-group")
-  // request.nextUrl.pathname.startsWith("/ems")
-  // request.nextUrl.pathname.startsWith("/fire")
-
-  //   const session = await auth0.getSession(request)
-
-  //   if (!session) {
-  // 	// user is not authenticated, redirect to login page
-  // 	return NextResponse.redirect(new URL("/auth/login", request.nextUrl.origin))
-  //   }
 
   /*****************************
    * *** AGILITY MIDDLEWARE ***

@@ -8,55 +8,9 @@ import NotFound from "./not-found"
 import InlineError from "components/common/InlineError"
 import {SitemapNode} from "lib/types/SitemapNode"
 import {notFound} from "next/navigation"
-import agilitySDK from "@agility/content-fetch"
 
 
-
-export const revalidate = 60
-export const runtime = "nodejs"
-export const dynamic = "force-static"
-
-/**
- * Generate the list of pages that we want to generate a build time.
- */
-export async function generateStaticParams() {
-	const isDevelopmentMode = process.env.NODE_ENV === "development";
-	const isPreview = isDevelopmentMode;
-	const apiKey = isPreview ? process.env.AGILITY_API_PREVIEW_KEY : process.env.AGILITY_API_FETCH_KEY;
-	const agilityClient = agilitySDK.getApi({
-	  guid: process.env.AGILITY_GUID,
-	  apiKey,
-	  isPreview,
-	});
-	const languageCode = process.env.AGILITY_LOCALES || "en-us";
-  
-	agilityClient.config.fetchConfig = {
-	  next: {
-		tags: [`agility-sitemap-flat-${languageCode}`],
-		revalidate: 60,
-	  },
-	};
-
-	const sitemap: { [path: string]: SitemapNode } = await agilityClient.getSitemapFlat({
-	  channelName: process.env.AGILITY_SITEMAP || "website",
-	  languageCode,
-	});
-  
-	const paths = Object.values(sitemap)
-	  .filter((node, index) => {
-		if (node.redirect !== null || node.isFolder === true || index === 0) return false;
-		if (node.path.startsWith("/api")) return false; // exclude api routes
-		return true;
-	  })
-	  .map((node) => {
-		return {
-		  slug: node.path.split("/").slice(1),
-		};
-	  });
-  
-	console.log("Pre-rendering", paths.length, "static paths.");
-	return paths;
-  }
+export const dynamic = "force-dynamic"
 
 /**
  * Generate metadata for this page
@@ -66,6 +20,12 @@ export async function generateMetadata(
 	parent: ResolvingMetadata
   ): Promise<Metadata> {
 	const { params } = props;  // Remove the 'await' here
+
+
+	const securedParams = await params;
+	
+	
+	console.log('Params', await params);
 
 	const { locale, sitemap, isDevelopmentMode, isPreview } = await getAgilityContext();
 	const agilityData = await getAgilityPage({ params });
