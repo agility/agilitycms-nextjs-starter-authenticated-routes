@@ -13,9 +13,14 @@ const jwt = require("jsonwebtoken");
 export const checkRouteAccess = async (request: NextRequest, url?: string) => {
 
 	const urlToCheck = url || request.nextUrl.pathname;
-
+	console.log("cheking url", urlToCheck);
 	const key = urlToCheck.replace(/\//g, "_");
 	const authRoutePermissionStr = await get(key);
+
+	if (!authRoutePermissionStr) {
+		//don't need to do a lookup here
+		return true
+	}
 
 	const session = await auth0.getSession(request);
 
@@ -25,10 +30,7 @@ export const checkRouteAccess = async (request: NextRequest, url?: string) => {
 		});
 		const userPermissions = decoded.payload.permissions as string[];
 
-		if (!authRoutePermissionStr) {
-			//don't need to do a lookup here
-			return true
-		}
+
 		const routePermissions = `${authRoutePermissionStr}`.split(",");
 
 		console.log("userPermissions", userPermissions);
