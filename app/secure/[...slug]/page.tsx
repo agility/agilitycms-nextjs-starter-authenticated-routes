@@ -19,16 +19,18 @@ export async function generateMetadata(
 	props: PageProps,
 	parent: ResolvingMetadata
   ): Promise<Metadata> {
-	const { params } = props;  // Remove the 'await' here
+	const { params } = props; 
 
-
-	const securedParams = await params;
+	const securedParams = (async () => {
+		const resolvedParams = await params;
+		return {
+			...resolvedParams,
+			slug: ['secure', ...resolvedParams.slug]
+		};
+	})();
 	
-	
-	console.log('Params', await params);
-
 	const { locale, sitemap, isDevelopmentMode, isPreview } = await getAgilityContext();
-	const agilityData = await getAgilityPage({ params });
+	const agilityData = await getAgilityPage({ params:securedParams });
 
 	if (!agilityData.page) return {};
 	return await resolveAgilityMetaData({
@@ -42,7 +44,15 @@ export async function generateMetadata(
   }
   export default async function Page({ params }: PageProps) {
 
-	const agilityData = await getAgilityPage({ params });
+	const securedParams = (async () => {
+		const resolvedParams = await params;
+		return {
+			...resolvedParams,
+			slug: ['secure', ...resolvedParams.slug]
+		};
+	})();
+
+	const agilityData = await getAgilityPage({ params:securedParams });
 	if (!agilityData.page) notFound();
 
 	const AgilityPageTemplate = getPageTemplate(agilityData.pageTemplateName || "");
