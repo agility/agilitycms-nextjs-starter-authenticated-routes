@@ -12,9 +12,8 @@ interface Props {
 }
 
 const SiteHeader = ({ header }: Props) => {
- 
   const [open, setOpen] = useState(false);
-  const [secureMenus, setSecureMenus] = useState<any>({});
+  const [secureMenus, setSecureMenus] = useState<any>([]);
 
   const { user, isLoading, error } = useUser();
 
@@ -103,32 +102,35 @@ const SiteHeader = ({ header }: Props) => {
               );
             })}
 
-            {Object.keys(secureMenus).map((groupKey) => {
-              return secureMenus[groupKey].items.map(
-                (navitem: any, index: number) => {
-                  const href = `/${groupKey.toLowerCase()}/${navitem.fields.title
-                    .toLowerCase()
-                    .replace(/\s+/g, "-")}`;
-                  return (
-                    <Link
-                      href={href}
-                      key={`secure_page-${index}`}
-                      className="text-base leading-6 font-medium text-secondary-500 hover:text-primary-500 border-transparent border-b-2 hover:border-primary-500 hover:border-b-primary hover:border-b-2 focus:outline-none focus:text-primary-500 transition duration-300"
-                    >
-                      {navitem.fields.title}
-                    </Link>
-                  );
-                }
-              );
-            })}
+            {secureMenus &&
+              secureMenus?.map((navitem: any, index: number) => {
+                return (
+                  <Link
+                    href={navitem.url}
+                    key={`secure_page-${index}`}
+                    className="text-base leading-6 font-medium text-secondary-500 hover:text-primary-500 border-transparent border-b-2 hover:border-primary-500 hover:border-b-primary hover:border-b-2 focus:outline-none focus:text-primary-500 transition duration-300"
+                  >
+                    {navitem.menuText}
+                  </Link>
+                );
+              })}
 
             {!user && (
-              <a
-                className="bg-red-500 text-white py-2 px-4 rounded-md"
-                href={"/auth/login"}
-              >
-                Log in
-              </a>
+              <>
+                {" "}
+                <a
+                  className="bg-red-500 text-white py-2 px-4 rounded-md"
+                  href={"/auth/login"}
+                >
+                  Log in
+                </a>
+                <a
+                  className="bg-red-500 text-white py-2 px-4 rounded-md"
+                  href={"/auth/login?screen_hint=signup"}
+                >
+                  Sign up
+                </a>
+              </>
             )}
             {user && (
               <a
@@ -222,7 +224,7 @@ const SiteHeader = ({ header }: Props) => {
                     );
                   })}
 
-                  {Object.keys(secureMenus).map((groupKey) => {
+                  {/* {Object.keys(secureMenus).map((groupKey) => {
                     return secureMenus[groupKey].items.map(
                       (navitem: any, index: number) => {
                         const href = `/${groupKey.toLowerCase()}/${navitem.fields.title
@@ -255,7 +257,7 @@ const SiteHeader = ({ header }: Props) => {
                         );
                       }
                     );
-                  })}
+                  })} */}
                 </nav>
               </div>
             </div>
