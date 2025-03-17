@@ -12,17 +12,28 @@ export async function GET(request: NextRequest) {
 
     const accessToken = session.tokenSet.accessToken;
     const decodedToken = jwt.decode(accessToken,  { complete: true })
-    const authorizedRoles = decodedToken.payload['http://localhost:3000/roles'];
-
+    const permissions = decodedToken.payload.permissions;
+   
     let response: any = {};
-    await Promise.all(authorizedRoles.map(async (role: string) => {
-        const list = await getContentList({
-            referenceName: `${role}Pages`, // you must have a corrisponding content list in agility
-            locale: process.env.AGILITY_LOCALES || 'en-us',
-        });
-        response[role] = list;
+
+    const routes = await getContentList({
+        referenceName: `AuthedRoutes`, // you must have a corrisponding content list in agility
+        locale: process.env.AGILITY_LOCALES || 'en-us',
+    });
+
+    const routePermissions = routes.items.map((item: any) => ({
+        menuText: item.fields.menuText,
+        url: item.fields.url,
+        permissions: item.fields.permissionText?.split(',')
     }));
 
-    // Your secure logic here
-    return NextResponse.json({ ...response });
+    const authorizedRoutes = routePermissions
+        .filter((route: any) => route.permissions?.some((permission: any) => permissions.includes(permission)))
+        .map((route: any) => ({
+            menuText: route.menuText,
+            url: route.url
+        }));
+
+    response = authorizedRoutes;
+    return NextResponse.json([ ...response ]);
 }

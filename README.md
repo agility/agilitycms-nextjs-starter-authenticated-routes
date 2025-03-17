@@ -1,4 +1,6 @@
-# Agility CMS & Next.js Starter with Authenticated Routes using Auth0 and RBAC
+# Agility CMS & Next.js Starter with Authenticated Routes, Authenticated Components & Authenticated Files
+
+This build is a little bit different than the main repo. It uses user permissions instead of token roles. 
 
 This is sample Next.js starter site that uses Agility CMS and aims to be a foundation for building sites using Next.js and Agility CMS.
 
@@ -10,9 +12,9 @@ This is sample Next.js starter site that uses Agility CMS and aims to be a found
 [New to Auth0? Sign up for FREE account](https://auth0.com/signup)
 
 
-### Configure your API
+#### Configure your API
 
-You will need to add a Custom API with RBAC enabled
+You will need to add a Custom API with RBAC enabled as well ensure that include permissions in the Access Token.
 
 <img width="1511" alt="Screenshot 2025-03-11 at 6 06 44 PM" src="https://github.com/user-attachments/assets/a5ef7690-206e-4829-9405-6aeb8f024896" />
 
@@ -31,80 +33,47 @@ export const auth0 = new Auth0Client({
 });
 ```
 
+#### Add your permissions groups to your Custom API
 
-#### Setup your user Roles
-<img width="1425" alt="Screenshot 2025-03-11 at 6 06 11 PM" src="https://github.com/user-attachments/assets/5dad16d1-104d-464c-86e1-82682f0746cb" />
+<img width="1057" alt="Screenshot 2025-03-17 at 1 11 45 PM" src="https://github.com/user-attachments/assets/f7832308-d9cd-4275-98d7-ba6796a5b1cd" />
 
-Don't forget to assign the Roles to your users. 
 
-#### Attaching the Roles to your Token
-You need to setup a Post-Login action
-<img width="1509" alt="Screenshot 2025-03-11 at 6 07 16 PM" src="https://github.com/user-attachments/assets/4d8dc25e-a25f-4097-9817-5cca635ca042" />
+#### Add the permissions to your users
 
-```
-/**
- * @param {Event} event - Details about the user and the context in which they are logging in.
- * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.
- */
-exports.onExecutePostLogin = async (event, api) => {
-  const namespace = 'http://localhost:3000';
-  if (event.authorization) {
-    api.idToken.setCustomClaim(`${namespace}/roles`, event.authorization.roles);
-    api.accessToken.setCustomClaim(`${namespace}/roles`, event.authorization.roles);
-  }
-} 
-```
+<img width="1238" alt="Screenshot 2025-03-17 at 1 13 44 PM" src="https://github.com/user-attachments/assets/68048de0-fa00-4c09-af37-e53b37cc19bb" />
+
+
 ---
 ### Configuring your Agility Instance
 
-This requires some parity with your user Roles. When creating a list of secure pages for a specific group, the content list should be prefixed with the Group. 
+#### Create a list of permissions
+
+<img width="1229" alt="Screenshot 2025-03-17 at 1 15 45 PM" src="https://github.com/user-attachments/assets/f835b6cd-05bd-415d-b566-9d7e7c018423" />
+
+#### Create an authenticated routes list
+
+<img width="1229" alt="Screenshot 2025-03-17 at 1 43 03 PM" src="https://github.com/user-attachments/assets/c585d13f-369d-4bb4-93ff-7db8d3d3d109" />
+
+Your model should look something similar to this
+
+<img width="1226" alt="Screenshot 2025-03-17 at 1 47 37 PM" src="https://github.com/user-attachments/assets/b69d1cf4-ed97-4727-806a-2b67fddd0b8a" />
+
+Here is an example of how we link to the user permissions list
+
+<img width="1317" alt="Screenshot 2025-03-17 at 1 41 06 PM" src="https://github.com/user-attachments/assets/eab3dddf-8bd2-4e00-9f8f-b453b58d6e56" />
 
 
-#### Create a list of Roles
-
-The content model is quite simple. Just a text field named `Group`.
-<img width="629" alt="Screenshot 2025-03-11 at 6 22 30 PM" src="https://github.com/user-attachments/assets/26a98917-9b97-4f04-a0f2-e1866beeadae" />
-
-These should match your Auth0 Groups. They are also case sensitive. 
-<img width="841" alt="Screenshot 2025-03-11 at 6 19 42 PM" src="https://github.com/user-attachments/assets/98ce5e6b-0617-43c1-acf9-7a0467a5b978" />
+#### You can also add permissions to Page Components to enforce only certain parts of the page requiring authenticated to be viewed instead of the entire route
 
 
-#### Create role based content lists (to be your pages)
-By using dynamic pages, we can turn a content list into pages within your site. Before we can do that though, we first need to create the lists.
+<img width="1206" alt="Screenshot 2025-03-17 at 1 54 16 PM" src="https://github.com/user-attachments/assets/c1ab8467-2c94-46c8-b504-1ce05e9a747f" />
 
-You are going to create 3 fields, Title (text), Content (RichText) and Security Group (Linked Content as a selectable list connected to the Auth0-Groups list)
+#### Lastly, this starter also includes an example of the Secure Files app which binds permissions to the routing permissions found in your Secured Routes lists
 
-<img width="695" alt="Screenshot 2025-03-11 at 6 23 52 PM" src="https://github.com/user-attachments/assets/2d5bbf62-00b2-4a62-8bad-37554d62798d" />
+<img width="1210" alt="Screenshot 2025-03-17 at 1 56 13 PM" src="https://github.com/user-attachments/assets/e63b705f-cf8e-43d9-a20e-22e25bc8f073" />
 
-<img width="1244" alt="Screenshot 2025-03-11 at 6 24 14 PM" src="https://github.com/user-attachments/assets/c111ed25-d9af-4103-a58c-2e50f4fd7582" />
-
-
-#### Create the content list from the model
-Be sure to name the content list `{Role} Pages` this will create the reference name without spaces ex. `EMSPages` `FirePages`
-
-<img width="1511" alt="Screenshot 2025-03-11 at 6 39 16 PM" src="https://github.com/user-attachments/assets/4868b944-1891-4d38-9491-85b76ea50357" />
-
-
-#### Add secured content pages to your lists
-
-
-Now that your models are setup, you can add pages to each role list
-
-We also assign a security group to the page content for routing purposes. 
-
-<img width="791" alt="Screenshot 2025-03-11 at 6 34 12 PM" src="https://github.com/user-attachments/assets/9f927066-b310-4f2d-b435-1fca9ca48612" />
-
-
-
-
-#### Making your lists Dynamic Pages
-
-The last step in the setup is to create dynamic pages from each of your role based lists.
-
-Be sure to select `Secure Page on Website` so that the Next.js middleware knows to authenticate against the route. 
-
-<img width="1511" alt="Screenshot 2025-03-11 at 6 31 53 PM" src="https://github.com/user-attachments/assets/624d23d3-417a-47e0-a615-a6b50028ab70" />
-
+#### To add the Secure Files app to your instance go to Settings > Apps
+<img width="1212" alt="Screenshot 2025-03-17 at 1 57 56 PM" src="https://github.com/user-attachments/assets/82c04c9b-77d4-4799-a9aa-c8434c5105c3" />
 
 
 ### Caching
