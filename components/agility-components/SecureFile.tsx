@@ -23,7 +23,7 @@ const SecureFile = async ({ module, languageCode, sitemapNode }: UnloadedModuleP
 	return (
 		<section id={`${contentID}`} className="relative px-8" data-agility-component={contentID}>
 			<div className="max-w-2xl mx-auto my-12 md:mt-18 lg:mt-20">
-				<div>Download secure file: <a href={url} target="_blank" referrerPolicy="no-referrer" className="text-indigo-600 hover:underline">{label}</a></div>
+				<div>Download secure file: <a href={url} target="_blank" rel="noreferrer" referrerPolicy="no-referrer" className="text-indigo-600 hover:underline">{label}</a></div>
 
 			</div>
 		</section>
