@@ -1,3 +1,4 @@
+import { rebuildAuthList } from "lib/cms-content/rebuildAuthList";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -20,11 +21,15 @@ export async function POST(req: NextRequest) {
 
 
 	//only process publish events
-	if (data.state === "Published") {
+	if (data.state === "Published" || data.state === "Unpublished" || data.state === "Deleted") {
 
 		//revalidate the correct tags based on what changed
 		if (data.referenceName) {
 			//content item change
+			if (data.referenceName === "authedroutes") {
+				//kick off a rebuild to rebuild the list of authed routes
+				await rebuildAuthList()
+			}
 			const itemTag = `agility-content-${data.referenceName}-${data.languageCode}`
 			const listTag = `agility-content-${data.contentID}-${data.languageCode}`
 			revalidateTag(itemTag)

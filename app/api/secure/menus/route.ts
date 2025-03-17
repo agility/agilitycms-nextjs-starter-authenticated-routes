@@ -1,8 +1,10 @@
 import { auth0 } from 'lib/auth0/auth0';
+
 import { getContentList } from 'lib/cms/getContentList';
 import { NextRequest, NextResponse } from 'next/server';
 const jwt = require('jsonwebtoken');
 export async function GET(request: NextRequest) {
+
 
     const session = await auth0.getSession();
 
@@ -10,10 +12,11 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+
     const accessToken = session.tokenSet.accessToken;
-    const decodedToken = jwt.decode(accessToken,  { complete: true })
+    const decodedToken = jwt.decode(accessToken, { complete: true })
     const permissions = decodedToken.payload.permissions;
-   
+
     let response: any = {};
 
     const routes = await getContentList({
@@ -35,5 +38,5 @@ export async function GET(request: NextRequest) {
         }));
 
     response = authorizedRoutes;
-    return NextResponse.json([ ...response ]);
+    return NextResponse.json([...response]);
 }

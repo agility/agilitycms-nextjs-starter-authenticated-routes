@@ -1,7 +1,6 @@
 import { auth0 } from 'lib/auth0/auth0';
 import { getContentList } from 'lib/cms/getContentList';
-import { INTERNALS } from 'next/dist/server/web/spec-extension/request';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 const jwt = require('jsonwebtoken');
 import { BlobServiceClient } from "@azure/storage-blob";
 
@@ -17,6 +16,7 @@ export async function GET(request: NextRequest) {
 			status: 401,
 		})
 	}
+
 
 	const session = await auth0.getSession();
 

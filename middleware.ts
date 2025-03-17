@@ -3,11 +3,12 @@ import type { NextRequest } from "next/server";
 import { auth0 } from "./lib/auth0/auth0";
 import { getAgilityPage } from "lib/cms/getAgilityPage";
 import { getContentList } from "lib/cms/getContentList";
+import { get } from "@vercel/edge-config";
+import { checkRouteAccess } from "lib/checkRouteAccess";
 const jwt = require("jsonwebtoken");
 
 // This function can be marked `async` if using `await` inside
 export async function middleware(request: NextRequest) {
-
 
   // Run Auth0 middleware first
   const authRes = await auth0.middleware(request);
@@ -20,47 +21,13 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-
-
-
-  //get the list of authorized routes in Agility
-  const routes = await getContentList({
-    referenceName: "AuthedRoutes",
-    languageCode: "en-us",
-  });
-
-  const routePermissions = routes.items.map((item: any) => ({
-    url: item.fields.url,
-    permissions: item.fields.permissionText?.split(","),
-  }));
-
-  const session = await auth0.getSession(request);
-
-  if (session) {
-    const decoded = jwt.decode(session.tokenSet.accessToken, {
-      complete: true,
-    });
-    const userPermissions = decoded.payload.permissions;
-
-    const route = routePermissions.find(
-      (route: any) => route.url === request.nextUrl.pathname
-    );
-
-    if (
-      route &&
-      route.permissions?.some((permission: string) =>
-        userPermissions.includes(permission)
-      )
-    ) {
-      return NextResponse.next();
-    } else if (
-      route &&
-      !route.permissions.some((permission: string) =>
-        userPermissions.includes(permission)
-      )
-    ) {
-      return NextResponse.redirect(new URL("/", request.nextUrl.origin));
-    }
+  if (await checkRouteAccess(request)) {
+    //they have access
+    return NextResponse.next();
+  } else {
+    //show a 403 error
+    console.log("User does not have permission to access this route");
+    return new Response("You do not have access to this page", { status: 403 });
   }
 
 
