@@ -32,7 +32,7 @@ export default async function SecureComponent({
     );
   }
 
-  //get the permissions list
+  //get the component data
   const {
     fields: { title, content, permissions },
     contentID,
@@ -41,7 +41,9 @@ export default async function SecureComponent({
     languageCode,
   });
 
-  const permissionStrings = permissions.map(p => p.fields.group);
+  console.log("Permissions on this component", permissions);
+
+  const permissionStrings = (permissions || []).map(p => p.fields.group);
 
   console.log("my permissions", userPermissions)
   console.log("secure component permissions", permissionStrings);
