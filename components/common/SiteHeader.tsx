@@ -124,12 +124,12 @@ const SiteHeader = ({ header }: Props) => {
                 >
                   Log in
                 </a>
-                <a
+                {/* <a
                   className="bg-red-500 text-white py-2 px-4 rounded-md"
                   href={"/auth/login?screen_hint=signup"}
                 >
                   Sign up
-                </a>
+                </a> */}
               </>
             )}
             {user && (
