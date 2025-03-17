@@ -66,7 +66,7 @@ export default async function Page({ params }: PageProps) {
 			) : (
 				<InlineError message={`No template found for page template name: ${agilityData.pageTemplateName}`} />
 			)}
-			<div>Render Date: {renderDate}</div>
+			<div className="hidden">Render Date: {renderDate}</div>
 		</div>
 	);
 }
