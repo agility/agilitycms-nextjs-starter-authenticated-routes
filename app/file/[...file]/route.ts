@@ -3,6 +3,17 @@ import { getContentList } from 'lib/cms/getContentList';
 import { NextRequest } from 'next/server';
 const jwt = require('jsonwebtoken');
 import { BlobServiceClient } from "@azure/storage-blob";
+import {
+	GetObjectCommand,
+	S3Client,
+	S3ClientConfig,
+
+} from '@aws-sdk/client-s3';
+
+import {
+	getSignedUrl,
+	S3RequestPresigner,
+} from "@aws-sdk/s3-request-presigner";
 
 export async function GET(request: NextRequest) {
 
@@ -56,36 +67,63 @@ export async function GET(request: NextRequest) {
 			status: 401,
 		})
 	}
+	/**
+	 * Generate a signed URL for the file using AWS
+	 */
 
-	const connStr = process.env.AZURE_STORAGE_CONNSTR
-	const containerName = process.env.AZURE_STORAGE_CONTAINER
+	const bucketName = process.env.AWS_S3_BUCKET_NAME || ""
+	const region = process.env.AWS_S3_REGION || ""
+	const accessKeyId = process.env.AWS_S3_ACCESS_ID || ""
+	const secretAccessKey = process.env.AWS_S3_SECRET_KEY || ''
+
+	const s3Config: S3ClientConfig = {
+		credentials: {
+			accessKeyId,
+			secretAccessKey,
+		},
+		region,
+	};
+
+	const s3Client = new S3Client(s3Config);
+	const command = new GetObjectCommand({ Bucket: bucketName, Key: filename });
+	const signedUrlRes = await getSignedUrl(s3Client, command, { expiresIn: 10 });
+
+	//redirect to the signed URL
+	return Response.redirect(signedUrlRes, 302)
 
 
-	if (!connStr || !containerName) {
-		return new Response('Secure File Connection Not Set', {
-			status: 400,
-		})
-	}
+	/****
+	 * BELOW IS FOR AZURE STORAGE
+	 */
+	// const connStr = process.env.AZURE_STORAGE_CONNSTR
+	// const containerName = process.env.AZURE_STORAGE_CONTAINER
 
-	//get the file from azure
-	const blobServiceClient = BlobServiceClient.fromConnectionString(connStr)
-	const containerClient = blobServiceClient.getContainerClient(containerName)
-	const blob = containerClient.getBlobClient(filename)
 
-	if (!await blob.exists()) {
-		return new Response('File Not Found', {
-			status: 404,
-		})
-	}
-	const props = await blob.getProperties()
+	// if (!connStr || !containerName) {
+	// 	return new Response('Secure File Connection Not Set', {
+	// 		status: 400,
+	// 	})
+	// }
 
-	const buffer = await blob.downloadToBuffer()
+	// //get the file from azure
+	// const blobServiceClient = BlobServiceClient.fromConnectionString(connStr)
+	// const containerClient = blobServiceClient.getContainerClient(containerName)
+	// const blob = containerClient.getBlobClient(filename)
 
-	return new Response(buffer, {
-		headers: {
-			'Content-Type': props.contentType || 'application/octet-stream',
-			//'Content-Disposition': `attachment; filename="${filename}"`
-		}
-	})
+	// if (!await blob.exists()) {
+	// 	return new Response('File Not Found', {
+	// 		status: 404,
+	// 	})
+	// }
+	// const props = await blob.getProperties()
+
+	// const buffer = await blob.downloadToBuffer()
+
+	// return new Response(buffer, {
+	// 	headers: {
+	// 		'Content-Type': props.contentType || 'application/octet-stream',
+	// 		//'Content-Disposition': `attachment; filename="${filename}"`
+	// 	}
+	// })
 
 }

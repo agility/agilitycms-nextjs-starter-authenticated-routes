@@ -36,6 +36,8 @@
 	"devDependencies": {
 		"@agility/content-fetch": "^2.0.8",
 		"@agility/nextjs": "^15.0.3",
+		"@aws-sdk/client-s3": "^3.758.0",
+		"@aws-sdk/s3-request-presigner": "^3.758.0",
 		"@azure/storage-blob": "^12.26.0",
 		"@tailwindcss/typography": "^0.5.8",
 		"@types/jsonwebtoken": "^9.0.9",
