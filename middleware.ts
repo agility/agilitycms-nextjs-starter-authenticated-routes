@@ -21,10 +21,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  if (await checkRouteAccess(request)) {
-    //they have access
-    return NextResponse.next();
-  } else {
+  if (! await checkRouteAccess(request)) {
     //show a 403 error
     console.log("User does not have permission to access this route");
     return new Response("You do not have access to this page", { status: 403 });
